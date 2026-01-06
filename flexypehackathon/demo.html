@@ -17,6 +17,7 @@
         }
     </style>
 </head>
+
 <body>
     <div id="root"></div>
     
@@ -230,18 +231,51 @@
                 </div>
               </div>
 
-              <div className="helpful-actions">
-                <button className="action-btn primary">
-                  📍 Live Track
+              {/* Revolutionary Interactive Features */}
+              <div className="interactive-features">
+                <button className="action-btn primary pulse" onClick={() => {
+                  setNotifications(prev => [...prev, '🚀 Live tracking activated!']);
+                }}>
+                  📍 Live Track with AI
                 </button>
                 <button className="action-btn" onClick={() => setShowRewards(true)}>
                   🎁 Rewards ({rewardPoints})
                 </button>
                 <button className="action-btn" onClick={() => setShowChatbot(true)}>
-                  🤖 AI Help
+                  🤖 AI Assistant
                 </button>
-                <button className="action-btn">
-                  📄 Receipt
+                <button className="action-btn" onClick={() => {
+                  setNotifications(prev => [...prev, '📄 Receipt sent to email!']);
+                }}>
+                  📄 Smart Receipt
+                </button>
+                <button className="action-btn" onClick={() => {
+                  navigator.share && navigator.share({
+                    title: 'Check out my purchase!',
+                    text: 'Just bought amazing products with AI recommendations!'
+                  });
+                }}>
+                  📱 Share Purchase
+                </button>
+              </div>
+
+              {/* Voice Command Feature */}
+              <div className="voice-command">
+                <button className="voice-btn" onClick={() => {
+                  if ('webkitSpeechRecognition' in window) {
+                    const recognition = new webkitSpeechRecognition();
+                    recognition.onresult = (event) => {
+                      const command = event.results[0][0].transcript.toLowerCase();
+                      if (command.includes('track')) {
+                        setNotifications(prev => [...prev, '🎤 Voice: Tracking your order...']);
+                      } else if (command.includes('rewards')) {
+                        setShowRewards(true);
+                      }
+                    };
+                    recognition.start();
+                  }
+                }}>
+                  🎤 Voice Commands
                 </button>
               </div>
 
@@ -254,25 +288,58 @@
                   </div>
                   <div className="rewards-content">
                     <div className="points-display">
-                      <div className="points-circle">
+                      <div className="points-circle animate-bounce">
                         <span className="points-number">{rewardPoints}</span>
                         <span className="points-label">Points</span>
                       </div>
                     </div>
+                    <div className="achievements">
+                      <h4>🏆 Achievements Unlocked</h4>
+                      <div className="achievement-grid">
+                        <div className="achievement unlocked">
+                          <span>🛍️</span>
+                          <div>First Purchase</div>
+                        </div>
+                        <div className="achievement unlocked">
+                          <span>⭐</span>
+                          <div>Gold Member</div>
+                        </div>
+                        <div className="achievement locked">
+                          <span>🔥</span>
+                          <div>Streak Master</div>
+                        </div>
+                      </div>
+                    </div>
                     <div className="rewards-grid">
-                      <div className="reward-item">
-                        <span>🎧</span>
-                        <div>Free Headphones<br/><small>5000 pts</small></div>
+                      <div className="reward-item available pulse">
+                        <span>☕</span>
+                        <div>$5 Coffee<br/><small>1000 pts</small></div>
+                        <button className="redeem-btn" onClick={() => {
+                          setRewardPoints(prev => prev - 1000);
+                          setNotifications(prev => [...prev, '☕ Coffee reward redeemed!']);
+                        }}>Redeem Now</button>
                       </div>
                       <div className="reward-item">
                         <span>🚚</span>
                         <div>Free Shipping<br/><small>500 pts</small></div>
+                        <button className="redeem-btn" onClick={() => {
+                          setRewardPoints(prev => prev - 500);
+                          setNotifications(prev => [...prev, '🚚 Free shipping activated!']);
+                        }}>Redeem</button>
                       </div>
-                      <div className="reward-item available">
-                        <span>☕</span>
-                        <div>$5 Coffee<br/><small>1000 pts</small></div>
-                        <button className="redeem-btn">Redeem</button>
+                      <div className="reward-item">
+                        <span>🎧</span>
+                        <div>Premium Headphones<br/><small>5000 pts</small></div>
+                        <button className="redeem-btn disabled">Need More Points</button>
                       </div>
+                    </div>
+                    <div className="spin-wheel">
+                      <button className="spin-btn" onClick={() => {
+                        const prizes = [100, 200, 500, 1000];
+                        const prize = prizes[Math.floor(Math.random() * prizes.length)];
+                        setRewardPoints(prev => prev + prize);
+                        setNotifications(prev => [...prev, `🎰 Spin won ${prize} points!`]);
+                      }}>🎰 Lucky Spin (100 pts)</button>
                     </div>
                   </div>
                 </div>
@@ -284,26 +351,41 @@
                   <div className="ar-content">
                     <h3>📱 AR Product Preview</h3>
                     <div className="ar-viewer">
-                      <div className="ar-placeholder">
+                      <div className="ar-placeholder animate-bounce">
                         🎧 <br/>
                         <span>Point your camera to see your headphones in 3D!</span>
+                        <div className="ar-controls">
+                          <button onClick={() => {
+                            setNotifications(prev => [...prev, '📸 AR photo saved!']);
+                          }}>📸 Take Photo</button>
+                          <button onClick={() => {
+                            setNotifications(prev => [...prev, '📱 Shared to social!']);
+                          }}>📱 Share AR</button>
+                        </div>
                       </div>
                     </div>
-                    <button onClick={() => setShowAR(false)}>Close</button>
+                    <button onClick={() => setShowAR(false)}>Close AR</button>
                   </div>
                 </div>
               )}
 
+              {/* AI-Powered Upsells */}
               {showUpsell && (
                 <div className="monetization-section">
-                  <h3>🚀 Personalized for You</h3>
+                  <h3>🚀 AI-Curated Just for You</h3>
+                  <div className="ai-confidence">
+                    <div className="confidence-meter">
+                      <div className="confidence-bar" style={{width: '94%'}}></div>
+                      <span>94% AI Confidence Match</span>
+                    </div>
+                  </div>
                   <div className="offers-grid">
                     {personalizedOffers.map((offer, idx) => (
                       <div key={idx} className={`offer-card ${offer.type} interactive`}>
                         <div className="offer-header">
                           <h4>{offer.title}</h4>
                           {offer.confidence && (
-                            <div className="confidence-badge">{offer.confidence}% match</div>
+                            <div className="confidence-badge pulse">{offer.confidence}% match</div>
                           )}
                           {offer.urgency && <span className="urgency pulse">{offer.urgency}</span>}
                         </div>
@@ -324,27 +406,36 @@
                         
                         <div className="offer-actions">
                           <button className="add-btn glow" onClick={() => {
-                            setRewardPoints(prev => prev + 100);
-                            setNotifications(prev => [...prev, '🎉 Added! +100 bonus points!']);
-                          }}>Add to Order</button>
-                          <button className="learn-more">Learn More</button>
+                            setRewardPoints(prev => prev + 200);
+                            setNotifications(prev => [...prev, '🎉 Added! +200 bonus points!']);
+                            drawConfetti();
+                          }}>🛒 Add to Cart</button>
+                          <button className="learn-more">🔍 Learn More</button>
+                        </div>
+                        
+                        <div className="social-proof">
+                          <div className="live-stats">
+                            <span className="live-counter pulse">🔴 {Math.floor(Math.random() * 100) + 20} viewing</span>
+                            <span className="purchase-count">✅ {Math.floor(Math.random() * 1000) + 500} bought today</span>
+                          </div>
                         </div>
                       </div>
                     ))}
                     
-                    {/* Social Proof Offer */}
-                    <div className="offer-card social-proof">
+                    {/* Dynamic AI Offer */}
+                    <div className="offer-card ai-generated">
                       <div className="offer-header">
-                        <h4>👥 Community Favorite</h4>
-                        <div className="live-counter">🔴 47 viewing now</div>
+                        <h4>🤖 AI Generated Offer</h4>
+                        <div className="live-counter pulse">🔴 Live AI Analysis</div>
                       </div>
-                      <p>Premium Care Package - What 89% of customers add</p>
-                      <div className="social-stats">
-                        <div className="stat">⭐ 4.9/5 rating</div>
-                        <div className="stat">📦 2,847 sold today</div>
+                      <p>Based on your behavior: Extended Warranty Package</p>
+                      <div className="ai-reasoning">
+                        <small>💡 AI detected you value quality & protection</small>
                       </div>
                       <div className="offer-actions">
-                        <button className="add-btn">Join the Community</button>
+                        <button className="add-btn" onClick={() => {
+                          setNotifications(prev => [...prev, '🤖 AI offer accepted!']);
+                        }}>Accept AI Suggestion</button>
                       </div>
                     </div>
                   </div>
@@ -358,12 +449,13 @@
                 </div>
               )}
 
+              {/* Trust & Security */}
               <div className="trust-section">
                 <div className="guarantee">
                   <span>🛡️</span>
                   <div>
-                    <strong>30-Day Return Policy</strong>
-                    <p>Not satisfied? Return for full refund</p>
+                    <strong>AI-Powered Protection</strong>
+                    <p>30-day return + fraud detection</p>
                   </div>
                 </div>
                 
@@ -371,38 +463,67 @@
                   <span>💬</span>
                   <div>
                     <strong>24/7 AI Support</strong>
-                    <p>Instant help powered by AI</p>
+                    <p>Instant help with 99.9% accuracy</p>
                   </div>
                 </div>
                 
                 <div className="sustainability">
                   <span>🌱</span>
                   <div>
-                    <strong>Carbon Neutral Shipping</strong>
-                    <p>Your order plants 2 trees</p>
+                    <strong>Carbon Neutral+</strong>
+                    <p>Your order plants 3 trees via AI optimization</p>
                   </div>
                 </div>
               </div>
 
-              {/* Sentiment Feedback */}
+              {/* Interactive Sentiment */}
               <div className="sentiment-section">
-                <h4>How are you feeling about your purchase?</h4>
+                <h4>🎯 How's your experience?</h4>
                 <div className="sentiment-buttons">
                   {['😍', '😊', '😐', '😕'].map((emoji, idx) => (
                     <button 
                       key={idx} 
                       className={`sentiment-btn ${sentiment === ['excited', 'happy', 'neutral', 'concerned'][idx] ? 'active' : ''}`}
-                      onClick={() => setSentiment(['excited', 'happy', 'neutral', 'concerned'][idx])}
+                      onClick={() => {
+                        setSentiment(['excited', 'happy', 'neutral', 'concerned'][idx]);
+                        if (idx === 0) {
+                          setRewardPoints(prev => prev + 50);
+                          setNotifications(prev => [...prev, '🎉 +50 points for great feedback!']);
+                        }
+                      }}
                     >
                       {emoji}
                     </button>
                   ))}
                 </div>
                 {sentiment === 'excited' && (
-                  <div className="sentiment-response">
-                    🎉 Awesome! Share your excitement and earn 50 bonus points!
+                  <div className="sentiment-response animate-bounce">
+                    🎉 Amazing! Share your joy and earn 100 more points!
+                    <button className="share-joy" onClick={() => {
+                      setRewardPoints(prev => prev + 100);
+                      setNotifications(prev => [...prev, '📱 Shared! +100 bonus points!']);
+                    }}>📱 Share Joy</button>
                   </div>
                 )}
+              </div>
+
+              {/* Live Social Proof */}
+              <div className="social-proof-section">
+                <h4>🌟 Live Community Activity</h4>
+                <div className="live-feed">
+                  <div className="activity-item">
+                    <span>👤 Sarah just bought the same headphones</span>
+                    <span className="timestamp">2 min ago</span>
+                  </div>
+                  <div className="activity-item">
+                    <span>⭐ Mike rated his purchase 5 stars</span>
+                    <span className="timestamp">5 min ago</span>
+                  </div>
+                  <div className="activity-item">
+                    <span>🎁 Emma redeemed coffee reward</span>
+                    <span className="timestamp">8 min ago</span>
+                  </div>
+                </div>
               </div>
             </div>
           );
