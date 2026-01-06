@@ -12,17 +12,10 @@
         body {
             margin: 0;
             padding: 0;
-            background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #f5576c);
-            background-size: 400% 400%;
-            animation: gradientShift 15s ease infinite;
+            background: #f8fafc;
             min-height: 100vh;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-        }
-        
-        @keyframes gradientShift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+            color: #1e293b;
         }
     </style>
 </head>
@@ -303,13 +296,13 @@
           }, []);
 
           return (
-            <div className="dashboard particle-effect">
-              <canvas ref={canvasRef} className="confetti-canvas" />
+            <div className="dashboard">
+              <canvas ref={canvasRef} className="confetti-canvas" style={{display: 'none'}} />
               
               {/* Floating Notifications */}
               <div className="notifications">
                 {notifications.map((notif) => (
-                  <div key={notif.id} className="notification slide-in elastic-bounce">
+                  <div key={notif.id} className="notification">
                     {notif.message}
                   </div>
                 ))}
@@ -317,9 +310,9 @@
 
               {/* Enhanced AI Chatbot */}
               {showChatbot && (
-                <div className="chatbot glass-morphism fade-in-scale">
-                  <div className="chatbot-header morphing-gradient">
-                    <span className="neon-glow">🤖 AI Assistant</span>
+                <div className="chatbot">
+                  <div className="chatbot-header">
+                    <span>🤖 AI Assistant</span>
                     <button onClick={() => setShowChatbot(false)}>×</button>
                   </div>
                   <div className="chatbot-body">
@@ -368,13 +361,13 @@
                 </div>
               )}
 
-              <div className="order-section glass-morphism slide-in-bottom">
+              <div className="order-section">
                 <div className="success-header">
-                  <div className="checkmark success-checkmark breathing">✓</div>
-                  <h1 className="gradient-text neon-glow typewriter">Order Confirmed!</h1>
+                  <div className="checkmark">✓</div>
+                  <h1 className="gradient-text">Order Confirmed!</h1>
                   <p>Thank you for your purchase. We're preparing your order now.</p>
                   {aiInsights && (
-                    <div className="ai-insight holographic fade-in-scale">
+                    <div className="ai-insight">
                       <span className="ai-badge">🤖 AI Insight</span>
                       {aiInsights}
                     </div>
@@ -384,20 +377,20 @@
                 <div className="order-details">
                   <div className="order-info">
                     <h3>Order #{order.id}</h3>
-                    <div className={`status-badge ${order.customerTier} pulse`}>
+                    <div className={`status-badge ${order.customerTier}`}>
                       {order.customerTier} member • {order.status}
                     </div>
                   </div>
                   
                   <div className="items-list">
                     {order.items.map((item) => (
-                      <div key={item.id} className="item enhanced magnetic-hover">
+                      <div key={item.id} className="item enhanced">
                         <div className="item-details">
                           <span className="item-icon">{item.image}</span>
                           <div>
                             <div className="item-name">{item.name}</div>
                             <button 
-                              className="ar-preview ripple-effect"
+                              className="ar-preview"
                               onClick={() => setShowAR(true)}
                             >
                               📱 AR Preview
