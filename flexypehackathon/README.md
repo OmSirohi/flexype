@@ -4,7 +4,7 @@ Flexype is a revolutionary, AI-driven post-purchase dashboard designed to transf
 
 ## 🚀 Running the Demo
 
-To experience the future of post-purchase, simply open the `demo.html` file in your web browser. No complex setup is required.
+To experience the future of post-purchase, simply open the `index.html` file in your web browser. No complex setup is required.
 
 ## ✨ Features
 
