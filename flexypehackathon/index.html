@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🏆 flexype</title>
+    <title>🏆 Flexype - AI-Powered Post-Purchase Experience</title>
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -12,8 +12,17 @@
         body {
             margin: 0;
             padding: 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #f5576c);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
             min-height: 100vh;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
     </style>
 </head>
@@ -22,81 +31,157 @@
     <div id="root"></div>
     
     <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
+        const { useState, useEffect, useRef, useCallback } = React;
 
-        const PostPurchaseDashboard = () => {
+        const EnhancedPostPurchaseDashboard = () => {
+          // Core state
           const [order] = useState({
             id: 'ORD-2024-001',
             status: 'confirmed',
             items: [
-              { name: 'Wireless Headphones', price: 199, category: 'electronics', image: '🎧' },
-              { name: 'Phone Case', price: 29, category: 'accessories', image: '📱' }
+              { name: 'Wireless Headphones', price: 199, category: 'electronics', image: '🎧', id: 1 },
+              { name: 'Phone Case', price: 29, category: 'accessories', image: '📱', id: 2 }
             ],
             total: 228,
             estimatedDelivery: '2024-01-15',
             customerTier: 'gold'
           });
 
-          const [showUpsell, setShowUpsell] = useState(false);
+          // Dynamic state
           const [timeOnPage, setTimeOnPage] = useState(0);
           const [aiInsights, setAiInsights] = useState('');
           const [rewardPoints, setRewardPoints] = useState(2280);
-          const [showRewards, setShowRewards] = useState(false);
           const [trackingStage, setTrackingStage] = useState(1);
-          const [showAR, setShowAR] = useState(false);
           const [sentiment, setSentiment] = useState('excited');
-          const [personalizedOffers, setPersonalizedOffers] = useState([]);
+          const [liveViewers, setLiveViewers] = useState(47);
+          const [recentActivity, setRecentActivity] = useState([]);
+          
+          // UI state
+          const [showUpsell, setShowUpsell] = useState(false);
+          const [showRewards, setShowRewards] = useState(false);
+          const [showAR, setShowAR] = useState(false);
           const [showChatbot, setShowChatbot] = useState(false);
           const [notifications, setNotifications] = useState([]);
+          const [personalizedOffers, setPersonalizedOffers] = useState([]);
+          const [isListening, setIsListening] = useState(false);
+          const [chatMessages, setChatMessages] = useState([
+            { type: 'ai', message: 'Hi! I\'m your AI assistant. How can I help you today?' }
+          ]);
+          
+          // Refs
           const canvasRef = useRef(null);
+          const chatInputRef = useRef(null);
 
+          // Real-time updates
           useEffect(() => {
-            const timer = setInterval(() => setTimeOnPage(prev => prev + 1), 1000);
+            const timer = setInterval(() => {
+              setTimeOnPage(prev => prev + 1);
+              setLiveViewers(prev => Math.max(20, prev + Math.floor(Math.random() * 6) - 3));
+            }, 1000);
             return () => clearInterval(timer);
           }, []);
 
-          // AI-powered personalization
+          // AI-powered personalization timeline
           useEffect(() => {
-            if (timeOnPage === 3) {
-              setAiInsights('Based on your purchase history, you love premium audio gear!');
-              generatePersonalizedOffers();
-            }
-            if (timeOnPage === 6) setShowRewards(true);
-            if (timeOnPage === 8) setShowUpsell(true);
-            if (timeOnPage === 12) {
-              setNotifications(prev => [...prev, 'Your order is being prepared! 📦']);
-            }
+            const events = [
+              { time: 3, action: () => {
+                setAiInsights('🤖 AI detected: You love premium audio gear!');
+                generatePersonalizedOffers();
+              }},
+              { time: 6, action: () => setShowRewards(true) },
+              { time: 8, action: () => setShowUpsell(true) },
+              { time: 12, action: () => addNotification('📦 Your order is being prepared!') },
+              { time: 20, action: () => addNotification('🚚 Shipping label created!') },
+              { time: 30, action: () => addNotification('⭐ You earned a new achievement!') }
+            ];
+
+            events.forEach(event => {
+              if (timeOnPage === event.time) {
+                event.action();
+              }
+            });
           }, [timeOnPage]);
 
           // Simulate real-time tracking updates
           useEffect(() => {
             const trackingTimer = setInterval(() => {
-              setTrackingStage(prev => prev < 5 ? prev + 1 : prev);
+              setTrackingStage(prev => {
+                if (prev < 5) {
+                  addNotification(`📍 Order status updated: ${getTrackingStages()[prev].title}`);
+                  return prev + 1;
+                }
+                return prev;
+              });
             }, 15000);
             return () => clearInterval(trackingTimer);
           }, []);
 
-          const generatePersonalizedOffers = () => {
+          // Real-time activity feed
+          useEffect(() => {
+            const activities = [
+              'Sarah from NYC just bought Wireless Headphones',
+              'Mike from LA added Premium Subscription', 
+              'Emma from London redeemed 500 points',
+              'Alex from Tokyo used AR preview',
+              'Maria from Berlin earned Gold status'
+            ];
+            
+            const activityTimer = setInterval(() => {
+              const randomActivity = activities[Math.floor(Math.random() * activities.length)];
+              setRecentActivity(prev => [
+                { text: randomActivity, time: new Date().toLocaleTimeString(), id: Date.now() },
+                ...prev.slice(0, 4)
+              ]);
+            }, 8000);
+            
+            return () => clearInterval(activityTimer);
+          }, []);
+
+          const addNotification = useCallback((message) => {
+            const notification = {
+              id: Date.now(),
+              message,
+              timestamp: new Date()
+            };
+            setNotifications(prev => [...prev, notification]);
+            
+            setTimeout(() => {
+              setNotifications(prev => prev.filter(n => n.id !== notification.id));
+            }, 5000);
+          }, []);
+
+          const generatePersonalizedOffers = useCallback(() => {
             const aiOffers = [
               {
                 type: 'ai-recommended',
-                title: '🤖 AI Pick: Premium Subscription',
-                description: 'Based on your audio preferences, unlock exclusive tracks',
-                confidence: 94,
+                title: '🎵 AI Pick: Premium Audio Subscription',
+                description: 'Unlock exclusive tracks and lossless streaming based on your audio preferences',
+                confidence: 96,
                 price: 9.99,
-                savings: 50
+                originalPrice: 19.99,
+                aiReasoning: 'Based on your headphone purchase and 94% similar user behavior',
+                urgency: 'Limited: 50% off first 3 months'
               },
               {
                 type: 'social-proof',
-                title: '🔥 Trending: Wireless Charger',
-                description: '2,847 customers bought this with headphones today',
-                price: 39,
-                originalPrice: 59,
-                urgency: '3 left in stock'
+                title: '🔥 Trending: Wireless Charging Pad',
+                description: 'Fast charging for all your devices - perfect wireless companion',
+                price: 39.99,
+                originalPrice: 59.99,
+                socialProof: `${Math.floor(Math.random() * 1000) + 2000} customers bought this today`,
+                urgency: `Only ${Math.floor(Math.random() * 10) + 3} left in stock`
+              },
+              {
+                type: 'eco-friendly',
+                title: '🌱 Eco Choice: Bamboo Phone Stand',
+                description: 'Sustainable bamboo stand - carbon neutral shipping included',
+                price: 24.99,
+                confidence: 78,
+                ecoImpact: 'Saves 2.3kg CO2 vs plastic alternatives'
               }
             ];
             setPersonalizedOffers(aiOffers);
-          };
+          }, []);
 
           const getTrackingStages = () => [
             { stage: 1, title: 'Order Confirmed', icon: '✅', active: trackingStage >= 1 },
@@ -106,73 +191,190 @@
             { stage: 5, title: 'Delivered', icon: '🎉', active: trackingStage >= 5 }
           ];
 
-          const drawConfetti = () => {
+          const drawConfetti = useCallback(() => {
             const canvas = canvasRef.current;
             if (!canvas) return;
+            
             const ctx = canvas.getContext('2d');
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
             
-            const confetti = [];
-            for (let i = 0; i < 50; i++) {
-              confetti.push({
-                x: Math.random() * canvas.width,
-                y: Math.random() * canvas.height - canvas.height,
-                vx: Math.random() * 4 - 2,
-                vy: Math.random() * 3 + 2,
-                color: ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57'][Math.floor(Math.random() * 5)]
-              });
-            }
+            const confetti = Array.from({ length: 50 }, () => ({
+              x: Math.random() * canvas.width,
+              y: Math.random() * canvas.height - canvas.height,
+              vx: Math.random() * 4 - 2,
+              vy: Math.random() * 3 + 2,
+              color: ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57'][Math.floor(Math.random() * 5)],
+              rotation: Math.random() * 360,
+              rotationSpeed: Math.random() * 10 - 5
+            }));
             
             const animate = () => {
               ctx.clearRect(0, 0, canvas.width, canvas.height);
               confetti.forEach(p => {
+                ctx.save();
+                ctx.translate(p.x, p.y);
+                ctx.rotate(p.rotation * Math.PI / 180);
                 ctx.fillStyle = p.color;
-                ctx.fillRect(p.x, p.y, 8, 8);
+                ctx.fillRect(-4, -4, 8, 8);
+                ctx.restore();
+                
                 p.x += p.vx;
                 p.y += p.vy;
+                p.rotation += p.rotationSpeed;
               });
-              if (confetti[0].y < canvas.height) requestAnimationFrame(animate);
+              
+              if (confetti[0].y < canvas.height) {
+                requestAnimationFrame(animate);
+              }
             };
             animate();
-          };
+          }, []);
 
           useEffect(() => {
             drawConfetti();
+          }, [drawConfetti]);
+
+          const handleVoiceCommand = useCallback(() => {
+            if (!('webkitSpeechRecognition' in window)) {
+              addNotification('Voice commands not supported in this browser');
+              return;
+            }
+
+            const recognition = new webkitSpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'en-US';
+
+            recognition.onstart = () => {
+              setIsListening(true);
+              addNotification('🎤 Listening... Try saying "show rewards" or "track order"');
+            };
+
+            recognition.onresult = (event) => {
+              const command = event.results[0][0].transcript.toLowerCase();
+              processVoiceCommand(command);
+            };
+
+            recognition.onerror = () => {
+              setIsListening(false);
+              addNotification('Voice recognition error. Please try again.');
+            };
+
+            recognition.onend = () => {
+              setIsListening(false);
+            };
+
+            recognition.start();
+          }, []);
+
+          const processVoiceCommand = useCallback((command) => {
+            if (command.includes('reward') || command.includes('points')) {
+              setShowRewards(true);
+              addNotification('Opening your rewards panel');
+            } else if (command.includes('track') || command.includes('order')) {
+              document.querySelector('.tracking-section')?.scrollIntoView({ behavior: 'smooth' });
+              addNotification('Showing order tracking');
+            } else if (command.includes('support') || command.includes('help')) {
+              setShowChatbot(true);
+              addNotification('Opening AI assistant');
+            } else if (command.includes('offer') || command.includes('deal')) {
+              setShowUpsell(true);
+              addNotification('Showing personalized offers');
+            } else {
+              addNotification(`Command "${command}" not recognized. Try "show rewards" or "track order"`);
+            }
+          }, []);
+
+          const handleChatMessage = useCallback((message) => {
+            setChatMessages(prev => [...prev, { type: 'user', message }]);
+            
+            // Simulate AI response
+            setTimeout(() => {
+              const responses = [
+                'I can help you track your order, check rewards, or answer questions about your purchase.',
+                'Your order is progressing well! Would you like me to show you some complementary products?',
+                'I see you\'re interested in audio gear. Have you considered our premium subscription service?',
+                'Is there anything specific about your order you\'d like to know more about?'
+              ];
+              const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+              setChatMessages(prev => [...prev, { type: 'ai', message: randomResponse }]);
+            }, 1000);
           }, []);
 
           return (
-            <div className="dashboard">
+            <div className="dashboard particle-effect">
               <canvas ref={canvasRef} className="confetti-canvas" />
               
               {/* Floating Notifications */}
               <div className="notifications">
-                {notifications.map((notif, idx) => (
-                  <div key={idx} className="notification slide-in">{notif}</div>
+                {notifications.map((notif) => (
+                  <div key={notif.id} className="notification slide-in elastic-bounce">
+                    {notif.message}
+                  </div>
                 ))}
               </div>
 
-              {/* AI Chatbot */}
+              {/* Enhanced AI Chatbot */}
               {showChatbot && (
-                <div className="chatbot">
-                  <div className="chatbot-header">
-                    <span>🤖 AI Assistant</span>
+                <div className="chatbot glass-morphism fade-in-scale">
+                  <div className="chatbot-header morphing-gradient">
+                    <span className="neon-glow">🤖 AI Assistant</span>
                     <button onClick={() => setShowChatbot(false)}>×</button>
                   </div>
                   <div className="chatbot-body">
-                    <div className="message ai">Hi! I'm here to help optimize your post-purchase experience. Any questions?</div>
-                    <input placeholder="Ask me anything..." className="chat-input" />
+                    <div className="chat-messages" style={{maxHeight: '200px', overflowY: 'auto', marginBottom: '10px'}}>
+                      {chatMessages.map((msg, idx) => (
+                        <div key={idx} className={`message ${msg.type}`} style={{
+                          background: msg.type === 'ai' ? '#f0f0f0' : '#667eea',
+                          color: msg.type === 'ai' ? '#333' : 'white',
+                          padding: '8px 12px',
+                          borderRadius: '15px',
+                          margin: '5px 0',
+                          maxWidth: '80%',
+                          alignSelf: msg.type === 'ai' ? 'flex-start' : 'flex-end'
+                        }}>
+                          {msg.message}
+                        </div>
+                      ))}
+                    </div>
+                    <div style={{display: 'flex', gap: '5px'}}>
+                      <input 
+                        ref={chatInputRef}
+                        placeholder="Ask me anything..."
+                        className="chat-input"
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter' && e.target.value.trim()) {
+                            handleChatMessage(e.target.value);
+                            e.target.value = '';
+                          }
+                        }}
+                      />
+                      <button 
+                        className="liquid-button"
+                        style={{padding: '8px 12px', fontSize: '12px'}}
+                        onClick={() => {
+                          const input = chatInputRef.current;
+                          if (input.value.trim()) {
+                            handleChatMessage(input.value);
+                            input.value = '';
+                          }
+                        }}
+                      >
+                        Send
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
 
-              <div className="order-section">
+              <div className="order-section glass-morphism slide-in-bottom">
                 <div className="success-header">
-                  <div className="checkmark animate-bounce">✓</div>
-                  <h1 className="gradient-text">Order Confirmed!</h1>
+                  <div className="checkmark success-checkmark breathing">✓</div>
+                  <h1 className="gradient-text neon-glow typewriter">Order Confirmed!</h1>
                   <p>Thank you for your purchase. We're preparing your order now.</p>
                   {aiInsights && (
-                    <div className="ai-insight">
+                    <div className="ai-insight holographic fade-in-scale">
                       <span className="ai-badge">🤖 AI Insight</span>
                       {aiInsights}
                     </div>
@@ -182,20 +384,20 @@
                 <div className="order-details">
                   <div className="order-info">
                     <h3>Order #{order.id}</h3>
-                    <div className={`status-badge ${order.customerTier}`}>
+                    <div className={`status-badge ${order.customerTier} pulse`}>
                       {order.customerTier} member • {order.status}
                     </div>
                   </div>
                   
                   <div className="items-list">
-                    {order.items.map((item, idx) => (
-                      <div key={idx} className="item enhanced">
+                    {order.items.map((item) => (
+                      <div key={item.id} className="item enhanced magnetic-hover">
                         <div className="item-details">
                           <span className="item-icon">{item.image}</span>
                           <div>
                             <div className="item-name">{item.name}</div>
                             <button 
-                              className="ar-preview"
+                              className="ar-preview ripple-effect"
                               onClick={() => setShowAR(true)}
                             >
                               📱 AR Preview
@@ -213,323 +415,300 @@
                     </div>
                   </div>
 
-                  {/* Real-time Tracking */}
+                  {/* Enhanced Real-time Tracking */}
                   <div className="tracking-section">
-                    <h4>Live Tracking</h4>
+                    <h4>🚚 Live Tracking</h4>
                     <div className="tracking-progress">
                       {getTrackingStages().map((stage, idx) => (
-                        <div key={idx} className={`tracking-stage ${stage.active ? 'active' : ''}`}>
+                        <div key={idx} className={`tracking-stage ${stage.active ? 'active' : ''} ${stage.active ? 'elastic-bounce' : ''}`}>
                           <div className="stage-icon">{stage.icon}</div>
                           <div className="stage-title">{stage.title}</div>
                         </div>
                       ))}
                     </div>
-                    <div className="delivery-info">
-                      <h4>📅 Estimated Delivery: {order.estimatedDelivery}</h4>
+                    <div className="estimated-delivery">
+                      📅 Estimated delivery: {order.estimatedDelivery}
+                    </div>
+                    <div className="progress-bar" style={{marginTop: '15px', height: '8px'}}>
+                      <div 
+                        className="progress-fill"
+                        style={{width: `${(trackingStage / 5) * 100}%`}}
+                      />
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Revolutionary Interactive Features */}
-              <div className="interactive-features">
-                <button className="action-btn primary pulse" onClick={() => {
-                  setNotifications(prev => [...prev, '🚀 Live tracking activated!']);
-                }}>
-                  📍 Live Track with AI
-                </button>
-                <button className="action-btn" onClick={() => setShowRewards(true)}>
-                  🎁 Rewards ({rewardPoints})
-                </button>
-                <button className="action-btn" onClick={() => setShowChatbot(true)}>
+              {/* Dynamic Action Buttons */}
+              <div className="helpful-actions">
+                <button 
+                  className="action-btn primary liquid-button magnetic-hover"
+                  onClick={() => setShowChatbot(true)}
+                >
                   🤖 AI Assistant
                 </button>
-                <button className="action-btn" onClick={() => {
-                  setNotifications(prev => [...prev, '📄 Receipt sent to email!']);
-                }}>
-                  📄 Smart Receipt
+                <button 
+                  className="action-btn liquid-button magnetic-hover"
+                  onClick={() => setShowRewards(true)}
+                >
+                  🎯 View Rewards ({rewardPoints.toLocaleString()} pts)
                 </button>
-                <button className="action-btn" onClick={() => {
-                  navigator.share && navigator.share({
-                    title: 'Check out my purchase!',
-                    text: 'Just bought amazing products with AI recommendations!'
-                  });
-                }}>
-                  📱 Share Purchase
+                <button 
+                  className="action-btn liquid-button magnetic-hover"
+                  onClick={handleVoiceCommand}
+                  disabled={isListening}
+                >
+                  {isListening ? '🎤 Listening...' : '🎤 Voice Commands'}
                 </button>
-              </div>
-
-              {/* Voice Command Feature */}
-              <div className="voice-command">
-                <button className="voice-btn" onClick={() => {
-                  if ('webkitSpeechRecognition' in window) {
-                    const recognition = new webkitSpeechRecognition();
-                    recognition.onresult = (event) => {
-                      const command = event.results[0][0].transcript.toLowerCase();
-                      if (command.includes('track')) {
-                        setNotifications(prev => [...prev, '🎤 Voice: Tracking your order...']);
-                      } else if (command.includes('rewards')) {
-                        setShowRewards(true);
-                      }
-                    };
-                    recognition.start();
-                  }
-                }}>
-                  🎤 Voice Commands
+                <button className="action-btn liquid-button magnetic-hover">
+                  📞 Contact Support
                 </button>
               </div>
 
-              {/* Gamified Rewards */}
-              {showRewards && (
-                <div className="rewards-section">
-                  <div className="rewards-header">
-                    <h3>🎯 Your Rewards Dashboard</h3>
-                    <button onClick={() => setShowRewards(false)}>×</button>
+              {/* AI-Powered Personalized Offers */}
+              {showUpsell && personalizedOffers.length > 0 && (
+                <div className="monetization-section glass-morphism slide-in-bottom">
+                  <div className="section-header">
+                    <h3 className="neon-glow">🤖 AI-Curated Just for You</h3>
+                    <p>Based on your preferences and purchase history</p>
                   </div>
-                  <div className="rewards-content">
-                    <div className="points-display">
-                      <div className="points-circle animate-bounce">
-                        <span className="points-number">{rewardPoints}</span>
-                        <span className="points-label">Points</span>
-                      </div>
-                    </div>
-                    <div className="achievements">
-                      <h4>🏆 Achievements Unlocked</h4>
-                      <div className="achievement-grid">
-                        <div className="achievement unlocked">
-                          <span>🛍️</span>
-                          <div>First Purchase</div>
-                        </div>
-                        <div className="achievement unlocked">
-                          <span>⭐</span>
-                          <div>Gold Member</div>
-                        </div>
-                        <div className="achievement locked">
-                          <span>🔥</span>
-                          <div>Streak Master</div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="rewards-grid">
-                      <div className="reward-item available pulse">
-                        <span>☕</span>
-                        <div>$5 Coffee<br/><small>1000 pts</small></div>
-                        <button className="redeem-btn" onClick={() => {
-                          setRewardPoints(prev => prev - 1000);
-                          setNotifications(prev => [...prev, '☕ Coffee reward redeemed!']);
-                        }}>Redeem Now</button>
-                      </div>
-                      <div className="reward-item">
-                        <span>🚚</span>
-                        <div>Free Shipping<br/><small>500 pts</small></div>
-                        <button className="redeem-btn" onClick={() => {
-                          setRewardPoints(prev => prev - 500);
-                          setNotifications(prev => [...prev, '🚚 Free shipping activated!']);
-                        }}>Redeem</button>
-                      </div>
-                      <div className="reward-item">
-                        <span>🎧</span>
-                        <div>Premium Headphones<br/><small>5000 pts</small></div>
-                        <button className="redeem-btn disabled">Need More Points</button>
-                      </div>
-                    </div>
-                    <div className="spin-wheel">
-                      <button className="spin-btn" onClick={() => {
-                        const prizes = [100, 200, 500, 1000];
-                        const prize = prizes[Math.floor(Math.random() * prizes.length)];
-                        setRewardPoints(prev => prev + prize);
-                        setNotifications(prev => [...prev, `🎰 Spin won ${prize} points!`]);
-                      }}>🎰 Lucky Spin (100 pts)</button>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* AR Preview Modal */}
-              {showAR && (
-                <div className="ar-modal">
-                  <div className="ar-content">
-                    <h3>📱 AR Product Preview</h3>
-                    <div className="ar-viewer">
-                      <div className="ar-placeholder animate-bounce">
-                        🎧 <br/>
-                        <span>Point your camera to see your headphones in 3D!</span>
-                        <div className="ar-controls">
-                          <button onClick={() => {
-                            setNotifications(prev => [...prev, '📸 AR photo saved!']);
-                          }}>📸 Take Photo</button>
-                          <button onClick={() => {
-                            setNotifications(prev => [...prev, '📱 Shared to social!']);
-                          }}>📱 Share AR</button>
-                        </div>
-                      </div>
-                    </div>
-                    <button onClick={() => setShowAR(false)}>Close AR</button>
-                  </div>
-                </div>
-              )}
-
-              {/* AI-Powered Upsells */}
-              {showUpsell && (
-                <div className="monetization-section">
-                  <h3>🚀 AI-Curated Just for You</h3>
-                  <div className="ai-confidence">
-                    <div className="confidence-meter">
-                      <div className="confidence-bar" style={{width: '94%'}}></div>
-                      <span>94% AI Confidence Match</span>
-                    </div>
-                  </div>
+                  
                   <div className="offers-grid">
                     {personalizedOffers.map((offer, idx) => (
-                      <div key={idx} className={`offer-card ${offer.type} interactive`}>
+                      <div key={idx} className={`offer-card interactive ${offer.type} magnetic-hover holographic`}>
                         <div className="offer-header">
                           <h4>{offer.title}</h4>
                           {offer.confidence && (
-                            <div className="confidence-badge pulse">{offer.confidence}% match</div>
+                            <div className="confidence-badge breathing">
+                              {offer.confidence}% AI Match
+                            </div>
                           )}
-                          {offer.urgency && <span className="urgency pulse">{offer.urgency}</span>}
+                          {offer.urgency && (
+                            <div className="urgency pulse">{offer.urgency}</div>
+                          )}
                         </div>
                         
                         <p>{offer.description}</p>
                         
-                        <div className="offer-value">
-                          <div className="price">
-                            ${offer.price}
-                            {offer.originalPrice && (
-                              <span className="original-price">${offer.originalPrice}</span>
-                            )}
-                            {offer.savings && (
-                              <span className="savings">Save {offer.savings}%!</span>
-                            )}
+                        {offer.confidence && (
+                          <div className="ai-confidence">
+                            <div className="confidence-meter">
+                              <div 
+                                className="confidence-bar" 
+                                style={{width: `${offer.confidence}%`}}
+                              >
+                                <span>{offer.confidence}% Match</span>
+                              </div>
+                            </div>
                           </div>
+                        )}
+                        
+                        <div className="price">
+                          ${offer.price}
+                          {offer.originalPrice && (
+                            <>
+                              <span className="original-price">${offer.originalPrice}</span>
+                              <span className="savings">Save ${offer.originalPrice - offer.price}</span>
+                            </>
+                          )}
                         </div>
+                        
+                        {offer.socialProof && (
+                          <div className="social-proof">
+                            <div className="live-counter pulse">{offer.socialProof}</div>
+                          </div>
+                        )}
                         
                         <div className="offer-actions">
-                          <button className="add-btn glow" onClick={() => {
-                            setRewardPoints(prev => prev + 200);
-                            setNotifications(prev => [...prev, '🎉 Added! +200 bonus points!']);
-                            drawConfetti();
-                          }}>🛒 Add to Cart</button>
-                          <button className="learn-more">🔍 Learn More</button>
-                        </div>
-                        
-                        <div className="social-proof">
-                          <div className="live-stats">
-                            <span className="live-counter pulse">🔴 {Math.floor(Math.random() * 100) + 20} viewing</span>
-                            <span className="purchase-count">✅ {Math.floor(Math.random() * 1000) + 500} bought today</span>
-                          </div>
+                          <button className="add-btn liquid-button">
+                            ✨ Add to Order
+                          </button>
+                          <button className="learn-more">Learn More</button>
                         </div>
                       </div>
                     ))}
-                    
-                    {/* Dynamic AI Offer */}
-                    <div className="offer-card ai-generated">
-                      <div className="offer-header">
-                        <h4>🤖 AI Generated Offer</h4>
-                        <div className="live-counter pulse">🔴 Live AI Analysis</div>
-                      </div>
-                      <p>Based on your behavior: Extended Warranty Package</p>
-                      <div className="ai-reasoning">
-                        <small>💡 AI detected you value quality & protection</small>
-                      </div>
-                      <div className="offer-actions">
-                        <button className="add-btn" onClick={() => {
-                          setNotifications(prev => [...prev, '🤖 AI offer accepted!']);
-                        }}>Accept AI Suggestion</button>
-                      </div>
-                    </div>
                   </div>
                   
                   <button 
                     className="dismiss-offers"
                     onClick={() => setShowUpsell(false)}
                   >
-                    ✨ I'm satisfied with my purchase
+                    Maybe later
                   </button>
                 </div>
               )}
 
-              {/* Trust & Security */}
-              <div className="trust-section">
-                <div className="guarantee">
-                  <span>🛡️</span>
-                  <div>
-                    <strong>AI-Powered Protection</strong>
-                    <p>30-day return + fraud detection</p>
-                  </div>
+              {/* Enhanced Real-time Social Proof */}
+              <div className="social-proof-section glass-morphism">
+                <h4>🔥 Live Activity</h4>
+                <div className="live-feed">
+                  {recentActivity.map((activity) => (
+                    <div key={activity.id} className="activity-item slide-in-bottom">
+                      <span>{activity.text}</span>
+                      <span className="timestamp">{activity.time}</span>
+                    </div>
+                  ))}
                 </div>
-                
-                <div className="support">
-                  <span>💬</span>
-                  <div>
-                    <strong>24/7 AI Support</strong>
-                    <p>Instant help with 99.9% accuracy</p>
+                <div className="live-stats">
+                  <div className="live-counter pulse">
+                    🔥 {liveViewers} people viewing this item
                   </div>
-                </div>
-                
-                <div className="sustainability">
-                  <span>🌱</span>
-                  <div>
-                    <strong>Carbon Neutral+</strong>
-                    <p>Your order plants 3 trees via AI optimization</p>
+                  <div className="purchase-count">
+                    💰 {Math.floor(Math.random() * 20) + 15} sold in last hour
                   </div>
                 </div>
               </div>
 
-              {/* Interactive Sentiment */}
-              <div className="sentiment-section">
-                <h4>🎯 How's your experience?</h4>
+              {/* Trust Building Section */}
+              <div className="trust-section glass-morphism">
+                <div className="guarantee magnetic-hover">
+                  <span>🛡️</span>
+                  <div>
+                    <strong>30-Day Guarantee</strong>
+                    <p>Not satisfied? Full refund, no questions asked.</p>
+                  </div>
+                </div>
+                <div className="support magnetic-hover">
+                  <span>💬</span>
+                  <div>
+                    <strong>24/7 AI Support</strong>
+                    <p>Our AI and human team is always here to help.</p>
+                  </div>
+                </div>
+                <div className="sustainability magnetic-hover">
+                  <span>🌱</span>
+                  <div>
+                    <strong>Carbon Neutral</strong>
+                    <p>Your order is shipped with zero carbon footprint.</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Sentiment Feedback */}
+              <div className="sentiment-section glass-morphism">
+                <h4>How are you feeling about your purchase?</h4>
                 <div className="sentiment-buttons">
-                  {['😍', '😊', '😐', '😕'].map((emoji, idx) => (
+                  {[
+                    { key: 'excited', emoji: '🤩', label: 'Excited' },
+                    { key: 'happy', emoji: '😊', label: 'Happy' },
+                    { key: 'neutral', emoji: '😐', label: 'Neutral' },
+                    { key: 'concerned', emoji: '😟', label: 'Concerned' }
+                  ].map(({ key, emoji, label }) => (
                     <button 
-                      key={idx} 
-                      className={`sentiment-btn ${sentiment === ['excited', 'happy', 'neutral', 'concerned'][idx] ? 'active' : ''}`}
-                      onClick={() => {
-                        setSentiment(['excited', 'happy', 'neutral', 'concerned'][idx]);
-                        if (idx === 0) {
-                          setRewardPoints(prev => prev + 50);
-                          setNotifications(prev => [...prev, '🎉 +50 points for great feedback!']);
-                        }
-                      }}
+                      key={key}
+                      className={`sentiment-btn magnetic-hover ${sentiment === key ? 'active' : ''}`}
+                      onClick={() => setSentiment(key)}
+                      title={label}
                     >
                       {emoji}
                     </button>
                   ))}
                 </div>
-                {sentiment === 'excited' && (
-                  <div className="sentiment-response animate-bounce">
-                    🎉 Amazing! Share your joy and earn 100 more points!
-                    <button className="share-joy" onClick={() => {
-                      setRewardPoints(prev => prev + 100);
-                      setNotifications(prev => [...prev, '📱 Shared! +100 bonus points!']);
-                    }}>📱 Share Joy</button>
+                {sentiment && (
+                  <div className="sentiment-response fade-in-scale">
+                    {{
+                      excited: "🎉 Awesome! We're thrilled you're excited about your purchase!",
+                      happy: "😊 Great to hear! We hope you love your new items.",
+                      neutral: "👍 Thanks for the feedback. Is there anything we can help with?",
+                      concerned: "😔 We're sorry to hear that. Let us make it right - our support team is standing by."
+                    }[sentiment]}
                   </div>
                 )}
               </div>
 
-              {/* Live Social Proof */}
-              <div className="social-proof-section">
-                <h4>🌟 Live Community Activity</h4>
-                <div className="live-feed">
-                  <div className="activity-item">
-                    <span>👤 Sarah just bought the same headphones</span>
-                    <span className="timestamp">2 min ago</span>
-                  </div>
-                  <div className="activity-item">
-                    <span>⭐ Mike rated his purchase 5 stars</span>
-                    <span className="timestamp">5 min ago</span>
-                  </div>
-                  <div className="activity-item">
-                    <span>🎁 Emma redeemed coffee reward</span>
-                    <span className="timestamp">8 min ago</span>
+              {/* AR Modal */}
+              {showAR && (
+                <div className="ar-modal">
+                  <div className="ar-content glass-morphism fade-in-scale">
+                    <h3>📱 AR Product Preview</h3>
+                    <div className="ar-viewer">
+                      <div className="ar-placeholder breathing">
+                        🎧
+                        <span>Point your camera to see your headphones in AR</span>
+                        <div className="loading-skeleton" style={{width: '100%', height: '4px', marginTop: '10px'}} />
+                      </div>
+                    </div>
+                    <div className="ar-controls">
+                      <button className="liquid-button">📷 Take Photo</button>
+                      <button className="liquid-button">🔄 Rotate</button>
+                      <button className="liquid-button" onClick={() => setShowAR(false)}>❌ Close</button>
+                    </div>
                   </div>
                 </div>
+              )}
+
+              {/* Enhanced Rewards Modal */}
+              {showRewards && (
+                <div className="rewards-section glass-morphism fade-in-scale">
+                  <div className="rewards-header">
+                    <h3 className="neon-glow">🎯 Your Rewards</h3>
+                    <button onClick={() => setShowRewards(false)}>×</button>
+                  </div>
+                  
+                  <div className="points-circle breathing morphing-gradient">
+                    <div className="points-number">{rewardPoints.toLocaleString()}</div>
+                    <div className="points-label">Points</div>
+                  </div>
+                  
+                  <div className="achievements">
+                    <h4>🏆 Achievements</h4>
+                    <div className="achievement-grid">
+                      {[
+                        { icon: '🛍️', name: 'First Purchase', unlocked: true },
+                        { icon: '⭐', name: 'Gold Member', unlocked: true },
+                        { icon: '🔥', name: 'Streak Master', unlocked: false },
+                        { icon: '🎯', name: 'Point Collector', unlocked: true },
+                        { icon: '🌟', name: 'VIP Status', unlocked: false },
+                        { icon: '💎', name: 'Diamond Tier', unlocked: false }
+                      ].map((achievement, idx) => (
+                        <div key={idx} className={`achievement ${achievement.unlocked ? 'unlocked' : 'locked'} magnetic-hover`}>
+                          <span>{achievement.icon}</span>
+                          <div>{achievement.name}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div className="rewards-grid">
+                    {[
+                      { icon: '☕', name: 'Free Coffee', cost: 500, available: true },
+                      { icon: '🚚', name: 'Free Shipping', cost: 1000, available: true },
+                      { icon: '🎁', name: 'Mystery Box', cost: 5000, available: false }
+                    ].map((reward, idx) => (
+                      <div key={idx} className={`reward-item ${reward.available ? 'available' : ''} magnetic-hover`}>
+                        <span>{reward.icon}</span>
+                        <div>{reward.name}</div>
+                        <div>{reward.cost} pts</div>
+                        <button className={`redeem-btn liquid-button ${!reward.available ? 'disabled' : ''}`}>
+                          {reward.available ? 'Redeem' : 'Need More'}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <div className="spin-wheel">
+                    <button className="spin-btn liquid-button">
+                      🎰 Lucky Spin (100 pts)
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Floating Action Button */}
+              <div className="floating-action">
+                <button 
+                  className="liquid-button magnetic-hover"
+                  onClick={() => setShowChatbot(true)}
+                  style={{borderRadius: '50%', width: '60px', height: '60px', fontSize: '24px'}}
+                >
+                  🤖
+                </button>
               </div>
             </div>
           );
         };
 
-        ReactDOM.render(<PostPurchaseDashboard />, document.getElementById('root'));
+        ReactDOM.render(<EnhancedPostPurchaseDashboard />, document.getElementById('root'));
     </script>
 </body>
 </html>
