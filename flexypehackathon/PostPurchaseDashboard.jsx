@@ -1,0 +1,389 @@
+import React, { useState, useEffect, useRef } from 'react';
+import './PostPurchaseDashboard.css';
+
+const PostPurchaseDashboard = () => {
+  const [order] = useState({
+    id: 'ORD-2024-001',
+    status: 'confirmed',
+    items: [
+      { name: 'Wireless Headphones', price: 199, category: 'electronics', image: '🎧' },
+      { name: 'Phone Case', price: 29, category: 'accessories', image: '📱' }
+    ],
+    total: 228,
+    estimatedDelivery: '2024-01-15',
+    customerTier: 'gold'
+  });
+
+  const [showUpsell, setShowUpsell] = useState(false);
+  const [timeOnPage, setTimeOnPage] = useState(0);
+  const [aiInsights, setAiInsights] = useState('');
+  const [rewardPoints, setRewardPoints] = useState(2280);
+  const [showRewards, setShowRewards] = useState(false);
+  const [trackingStage, setTrackingStage] = useState(1);
+  const [showAR, setShowAR] = useState(false);
+  const [sentiment, setSentiment] = useState('excited');
+  const [personalizedOffers, setPersonalizedOffers] = useState([]);
+  const [showChatbot, setShowChatbot] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    const timer = setInterval(() => setTimeOnPage(prev => prev + 1), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // AI-powered personalization
+  useEffect(() => {
+    if (timeOnPage === 3) {
+      setAiInsights('Based on your purchase history, you love premium audio gear!');
+      generatePersonalizedOffers();
+    }
+    if (timeOnPage === 6) setShowRewards(true);
+    if (timeOnPage === 8) setShowUpsell(true);
+    if (timeOnPage === 12) {
+      setNotifications(prev => [...prev, 'Your order is being prepared! 📦']);
+    }
+  }, [timeOnPage]);
+
+  // Simulate real-time tracking updates
+  useEffect(() => {
+    const trackingTimer = setInterval(() => {
+      setTrackingStage(prev => prev < 5 ? prev + 1 : prev);
+    }, 15000);
+    return () => clearInterval(trackingTimer);
+  }, []);
+
+  const generatePersonalizedOffers = () => {
+    const aiOffers = [
+      {
+        type: 'ai-recommended',
+        title: '🤖 AI Pick: Premium Subscription',
+        description: 'Based on your audio preferences, unlock exclusive tracks',
+        confidence: 94,
+        price: 9.99,
+        savings: 50
+      },
+      {
+        type: 'social-proof',
+        title: '🔥 Trending: Wireless Charger',
+        description: '2,847 customers bought this with headphones today',
+        price: 39,
+        originalPrice: 59,
+        urgency: '3 left in stock'
+      }
+    ];
+    setPersonalizedOffers(aiOffers);
+  };
+
+  const getTrackingStages = () => [
+    { stage: 1, title: 'Order Confirmed', icon: '✅', active: trackingStage >= 1 },
+    { stage: 2, title: 'Preparing', icon: '📦', active: trackingStage >= 2 },
+    { stage: 3, title: 'Shipped', icon: '🚚', active: trackingStage >= 3 },
+    { stage: 4, title: 'Out for Delivery', icon: '🏃', active: trackingStage >= 4 },
+    { stage: 5, title: 'Delivered', icon: '🎉', active: trackingStage >= 5 }
+  ];
+
+  const drawConfetti = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    
+    const confetti = [];
+    for (let i = 0; i < 50; i++) {
+      confetti.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height - canvas.height,
+        vx: Math.random() * 4 - 2,
+        vy: Math.random() * 3 + 2,
+        color: ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57'][Math.floor(Math.random() * 5)]
+      });
+    }
+    
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      confetti.forEach(p => {
+        ctx.fillStyle = p.color;
+        ctx.fillRect(p.x, p.y, 8, 8);
+        p.x += p.vx;
+        p.y += p.vy;
+      });
+      if (confetti[0].y < canvas.height) requestAnimationFrame(animate);
+    };
+    animate();
+  };
+
+  useEffect(() => {
+    drawConfetti();
+  }, []);
+
+  return (
+    <div className="dashboard">
+      <canvas ref={canvasRef} className="confetti-canvas" />
+      
+      {/* Floating Notifications */}
+      <div className="notifications">
+        {notifications.map((notif, idx) => (
+          <div key={idx} className="notification slide-in">{notif}</div>
+        ))}
+      </div>
+
+      {/* AI Chatbot */}
+      {showChatbot && (
+        <div className="chatbot">
+          <div className="chatbot-header">
+            <span>🤖 AI Assistant</span>
+            <button onClick={() => setShowChatbot(false)}>×</button>
+          </div>
+          <div className="chatbot-body">
+            <div className="message ai">Hi! I'm here to help optimize your post-purchase experience. Any questions?</div>
+            <input placeholder="Ask me anything..." className="chat-input" />
+          </div>
+        </div>
+      )}
+
+      <div className="order-section">
+        <div className="success-header">
+          <div className="checkmark animate-bounce">✓</div>
+          <h1 className="gradient-text">Order Confirmed!</h1>
+          <p>Thank you for your purchase. We're preparing your order now.</p>
+          {aiInsights && (
+            <div className="ai-insight">
+              <span className="ai-badge">🤖 AI Insight</span>
+              {aiInsights}
+            </div>
+          )}
+        </div>
+
+        <div className="order-details">
+          <div className="order-info">
+            <h3>Order #{order.id}</h3>
+            <div className={`status-badge ${order.customerTier}`}>
+              {order.customerTier} member • {order.status}
+            </div>
+          </div>
+          
+          <div className="items-list">
+            {order.items.map((item, idx) => (
+              <div key={idx} className="item enhanced">
+                <div className="item-details">
+                  <span className="item-icon">{item.image}</span>
+                  <div>
+                    <div className="item-name">{item.name}</div>
+                    <button 
+                      className="ar-preview"
+                      onClick={() => setShowAR(true)}
+                    >
+                      📱 AR Preview
+                    </button>
+                  </div>
+                </div>
+                <span className="item-price">${item.price}</span>
+              </div>
+            ))}
+            <div className="total">
+              <strong>Total: ${order.total}</strong>
+              <div className="rewards-earned">
+                +{Math.floor(order.total * 10)} points earned! 🎯
+              </div>
+            </div>
+          </div>
+
+          {/* Real-time Tracking */}
+          <div className="tracking-section">
+            <h4>Live Tracking</h4>
+            <div className="tracking-progress">
+              {getTrackingStages().map((stage, idx) => (
+                <div key={idx} className={`tracking-stage ${stage.active ? 'active' : ''}`}>
+                  <div className="stage-icon">{stage.icon}</div>
+                  <div className="stage-title">{stage.title}</div>
+                </div>
+              ))}
+            </div>
+            <div className="delivery-info">
+              <h4>📅 Estimated Delivery: {order.estimatedDelivery}</h4>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="helpful-actions">
+        <button className="action-btn primary">
+          📍 Live Track
+        </button>
+        <button className="action-btn" onClick={() => setShowRewards(true)}>
+          🎁 Rewards ({rewardPoints})
+        </button>
+        <button className="action-btn" onClick={() => setShowChatbot(true)}>
+          🤖 AI Help
+        </button>
+        <button className="action-btn">
+          📄 Receipt
+        </button>
+      </div>
+
+      {/* Gamified Rewards */}
+      {showRewards && (
+        <div className="rewards-section">
+          <div className="rewards-header">
+            <h3>🎯 Your Rewards Dashboard</h3>
+            <button onClick={() => setShowRewards(false)}>×</button>
+          </div>
+          <div className="rewards-content">
+            <div className="points-display">
+              <div className="points-circle">
+                <span className="points-number">{rewardPoints}</span>
+                <span className="points-label">Points</span>
+              </div>
+            </div>
+            <div className="rewards-grid">
+              <div className="reward-item">
+                <span>🎧</span>
+                <div>Free Headphones<br/><small>5000 pts</small></div>
+              </div>
+              <div className="reward-item">
+                <span>🚚</span>
+                <div>Free Shipping<br/><small>500 pts</small></div>
+              </div>
+              <div className="reward-item available">
+                <span>☕</span>
+                <div>$5 Coffee<br/><small>1000 pts</small></div>
+                <button className="redeem-btn">Redeem</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* AR Preview Modal */}
+      {showAR && (
+        <div className="ar-modal">
+          <div className="ar-content">
+            <h3>📱 AR Product Preview</h3>
+            <div className="ar-viewer">
+              <div className="ar-placeholder">
+                🎧 <br/>
+                <span>Point your camera to see your headphones in 3D!</span>
+              </div>
+            </div>
+            <button onClick={() => setShowAR(false)}>Close</button>
+          </div>
+        </div>
+      )}
+
+      {showUpsell && (
+        <div className="monetization-section">
+          <h3>🚀 Personalized for You</h3>
+          <div className="offers-grid">
+            {personalizedOffers.map((offer, idx) => (
+              <div key={idx} className={`offer-card ${offer.type} interactive`}>
+                <div className="offer-header">
+                  <h4>{offer.title}</h4>
+                  {offer.confidence && (
+                    <div className="confidence-badge">{offer.confidence}% match</div>
+                  )}
+                  {offer.urgency && <span className="urgency pulse">{offer.urgency}</span>}
+                </div>
+                
+                <p>{offer.description}</p>
+                
+                <div className="offer-value">
+                  <div className="price">
+                    ${offer.price}
+                    {offer.originalPrice && (
+                      <span className="original-price">${offer.originalPrice}</span>
+                    )}
+                    {offer.savings && (
+                      <span className="savings">Save {offer.savings}%!</span>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="offer-actions">
+                  <button className="add-btn glow" onClick={() => {
+                    setRewardPoints(prev => prev + 100);
+                    setNotifications(prev => [...prev, '🎉 Added! +100 bonus points!']);
+                  }}>Add to Order</button>
+                  <button className="learn-more">Learn More</button>
+                </div>
+              </div>
+            ))}
+            
+            {/* Social Proof Offer */}
+            <div className="offer-card social-proof">
+              <div className="offer-header">
+                <h4>👥 Community Favorite</h4>
+                <div className="live-counter">🔴 47 viewing now</div>
+              </div>
+              <p>Premium Care Package - What 89% of customers add</p>
+              <div className="social-stats">
+                <div className="stat">⭐ 4.9/5 rating</div>
+                <div className="stat">📦 2,847 sold today</div>
+              </div>
+              <div className="offer-actions">
+                <button className="add-btn">Join the Community</button>
+              </div>
+            </div>
+          </div>
+          
+          <button 
+            className="dismiss-offers"
+            onClick={() => setShowUpsell(false)}
+          >
+            ✨ I'm satisfied with my purchase
+          </button>
+        </div>
+      )}
+
+      <div className="trust-section">
+        <div className="guarantee">
+          <span>🛡️</span>
+          <div>
+            <strong>30-Day Return Policy</strong>
+            <p>Not satisfied? Return for full refund</p>
+          </div>
+        </div>
+        
+        <div className="support">
+          <span>💬</span>
+          <div>
+            <strong>24/7 AI Support</strong>
+            <p>Instant help powered by AI</p>
+          </div>
+        </div>
+        
+        <div className="sustainability">
+          <span>🌱</span>
+          <div>
+            <strong>Carbon Neutral Shipping</strong>
+            <p>Your order plants 2 trees</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Sentiment Feedback */}
+      <div className="sentiment-section">
+        <h4>How are you feeling about your purchase?</h4>
+        <div className="sentiment-buttons">
+          {['😍', '😊', '😐', '😕'].map((emoji, idx) => (
+            <button 
+              key={idx} 
+              className={`sentiment-btn ${sentiment === ['excited', 'happy', 'neutral', 'concerned'][idx] ? 'active' : ''}`}
+              onClick={() => setSentiment(['excited', 'happy', 'neutral', 'concerned'][idx])}
+            >
+              {emoji}
+            </button>
+          ))}
+        </div>
+        {sentiment === 'excited' && (
+          <div className="sentiment-response">
+            🎉 Awesome! Share your excitement and earn 50 bonus points!
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default PostPurchaseDashboard;
